@@ -19,6 +19,8 @@
 'foldingStopMarker':    '(?:[\\]\\}\\)]|(?:\\#|m4_dnl|dnl)\\s*endregion)'
 'patterns': [
     {'include': '#comment'}
+    {'include': '#first_comment_with_doc'}
+    {'include': '#first_comment'}
     {'include': '#define_macro'}
     {'include': '#invoke_macro'}
     {'include': '#quoted_input'}
@@ -29,18 +31,128 @@
 
 'repository':
 
-    'clear_comment':
+    # If the first line of a comment block contains a single identifier,
+    # or if it contains an identifier followed by an args list that either
+    # ends with nothing after it, or continues past the end of the line, we
+    # highlight it as documentation.
+
+    # To detect the first comment line, all comment rules will consume the
+    # comment character at the beginning of the following line (if present).
+    # All the comment rules except the first are predicated on a LOOKBEHIND
+    # that sees a comment token consumed by the previous rule. If there is a
+    # comment token for first_comment_* to match, it is the first comment line.
+
+    # We distinguish between first_comment_with_doc and first_comment because
+    # we want to allow multiple lines of documentation headers. To that end, the
+    # first_comment_with_doc rule refrains from consuming the comment token
+    # on the following line, making it as if that line were also the "first"
+    # line.
+
+    'mid_doc_comment_token':
         'name':     'comment.line.m4'
-        'match':    '''(?x)
-            (?: \\b(?:m4_)?dnl(?:$|\\b)|\\#
-            |   ^\\s*\\#.*
-            |   ^\\s*(?:m4_)?dnl.*
-            )\\s*$
+        'match':    '^(\\#|dnl)'
+
+    'first_comment_with_doc':
+        'name':     'comment.javadoc.line.m4'
+        'begin':    '''(?x)
+            # match the start of the comment
+            ^ \\s* ( \\# | [d][n][l] )
+
+            # then, after optional whitespace, the identifier.
+            \\s* [a-zA-Z_][a-zA-Z\\-_0-9]*
+
+            (?:
+                # match the beginning of an args list that does not end on
+                # this line.
+                (?= [\\(] [^\\)]* $ )
+            |
+                # match an args list followed by only whitespace
+                (?= [\\(] [^\\)]* [\\)] \\s* $ )
+            |
+                # match only whitespace after the identifier
+                \\s* $
+            )
         '''
+        'beginCaptures':
+            '1':
+                'name':     'comment.line.m4'
+        'end':      '^'
+        'patterns': [
+            {'include': '#documented_args'}
+        ]
+
+    'first_comment':
+        'name':     'comment.line.m4'
+        'begin':    '''(?x)
+            ^ \\s* ( \\# | \\b dnl \\b )
+
+            # This capture matches when the only non-whitespace characters in
+            # the comment are hyphens.
+
+            ( \\s* [\\-]+ \\s* $ )?
+        '''
+        'beginCaptures':
+            '2':
+                'name':     'comment.javadoc.line.m4'
+        'end':      '^\\s*(\\#|\\bdnl\\b)?'
 
     'comment':
         'name':     'comment.line.m4'
-        'match':    '(?:\\b(?:m4_)?dnl(?:$|\\b)|\\#).*$'
+        'begin':    '''(?x)
+            (?:
+                \\s* (?<= ^ \\# )
+            |
+                \\s* (?<= ^ dnl )
+            |
+                # match DNL tokens that do not occur at the
+                # beginning of the line.
+
+                ^ [\\s]+ \\b dnl \\b
+            )
+
+            ( \\s* [\\-]+ \\s* $ )?
+        '''
+        'beginCaptures':
+            '1':
+                'name':     'comment.javadoc.line.m4'
+        # Consume until the beginning of the next line, capturing the comment
+        # token for that line
+        'end':      '^(\\#|\\bdnl\\b)?'
+
+    'documented_args':
+        'name':     'comment.javadoc.m4'
+        'begin':    '''(?x)
+            [\\(]
+        '''
+        'beginCaptures':
+            '1':
+                'name': 'punctuation.comment.m4'
+        'end': '''(?x)
+            [\\)] (.*) $
+        '''
+        'endCaptures':
+            '1':
+                'name': 'comment.m4'
+        'patterns': [
+            {'include': '#mid_doc_comment_token'}
+            {
+                'match': '[a-zA-Z_][\\-a-zA-Z0-9]*'
+                'name': 'variable.parameter.function.m4'
+            }
+            {
+                'match': '[\\[\\]\\=\\,]'
+                'name': 'punctuation.definition.parameters.m4'
+            }
+        ]
+
+    'clear_comment':
+        'name':     'comment.line.m4'
+        'match':    '''(?x)
+            (?: \\b dnl (?: $ | \\b ) | \\#
+            |   ^\\s*\\#.*
+            |   ^\\s*dnl.*
+            )\\s*$
+        '''
 
     'define_macro':
         # This pattern attempts to match common macros that themselves operate
@@ -68,6 +180,8 @@
             '1':
                 'name': 'punctuation.definition.parameters.begin.m4'
         'patterns': [
+            {'include': '#first_comment_with_doc'}
+            {'include': '#first_comment'}
             {'include': '#comment'}
             {'include': '#define_macro'}
             {'include': '#invoke_macro'}
@@ -95,6 +209,8 @@
             '1':
                 'name': 'punctuation.definition.parameters.begin.m4'
         'patterns': [
+            {'include': '#first_comment_with_doc'}
+            {'include': '#first_comment'}
             {'include': '#comment'}
             {'include': '#define_macro'}
             {'include': '#invoke_macro'}
@@ -116,6 +232,7 @@
             | \\b(?:m4_)?[_]{2,}[a-zA-Z0-9_]*[_]{2,}\\b
             )
         '''
+
     'quoted_input':
         'name': 'meta.quote.m4'
         'begin': '(\\[)'
@@ -127,7 +244,9 @@
             '1':
                 'name': 'punctuation.definition.string.end.bold.m4'
         'patterns': [
-            {'include': '#clear_comment'}
+            {'include': '#first_comment_with_doc'}
+            {'include': '#first_comment'}
+            {'include': '#comment'}
             {'include': '#define_macro'}
             {'include': '#invoke_macro'}
             {'include': '#quoted_input'}
@@ -147,6 +266,8 @@
             '1':
                 'name': 'punctuation.definition.end.bold.m4'
         'patterns': [
+            {'include': '#first_comment_with_doc'}
+            {'include': '#first_comment'}
             {'include': '#comment'}
             {'include': '#define_macro'}
             {'include': '#invoke_macro'}
