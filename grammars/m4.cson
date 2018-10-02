@@ -51,7 +51,7 @@
         # are introduced.
 
         'name': 'meta.function.macro.define.m4'
-        'begin': '(\\b(?:(?:m4|e4|AC|AM)[_]?)?(?:def|undef|defn|define|undefine|SUBST|DEFINE|DEFUN|DEFUN)(?:[_][a-zA-Z0-9_]*)?\\b)(\\()\\s*(\\[)([^\\$\\,\\]\\)]+)(\\])\\s*[,]?'
+        'begin': '(\\b(?:(?:m4|e4|AC|AM)[_]?)?(?:def|undef|defn|define|undefine|SUBST|DEFINE|DEFUN|DEFUN)(?:[_][a-zA-Z0-9_]*)?\\b)(\\()\\s*(\\[)([^\\$\\,\\[\\]\\)]+)(\\])\\s*(?=[\\,\\)])'
         'beginCaptures':
             '1':
                 'name': 'keyword.control.macro.define.m4'
