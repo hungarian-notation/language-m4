@@ -8,56 +8,36 @@
   'e4'
   'ac'  # autoconf
 ]
-'firstLineMatch': '(?:AC_INIT|m4_[a-z0-9])'
-'foldingStartMarker':   '(?:[\\[\\{\\(]|\\#\\s*region)'
-'foldingStopMarker':    '(?:[\\]\\}\\)]|\\#\\s*endregion)'
+'firstLineMatch': '''(?x)
+    (?:     AC_INIT
+    |       m4_[a-z0-9]
+    |       include\\(\\`[^\\']*\\'\\)
+    |       \\-\\*\\-[ ]Autoconf[ ]\\-\\*\\-
+    )
+'''
+'foldingStartMarker':   '(?:[\\[\\{\\(]|(?:\\#|m4_dnl|dnl)\\s*region)'
+'foldingStopMarker':    '(?:[\\]\\}\\)]|(?:\\#|m4_dnl|dnl)\\s*endregion)'
 'patterns': [
+    {'include': '#comment'}
+    {'include': '#define_macro'}
+    {'include': '#invoke_macro'}
+    {'include': '#quoted_input'}
+    {'include': '#no_arg_macros'}
+    {'include': '#paren_list'}
+    {'include': '#argument_tokens'}
+]
 
-    {
-        'name': 'meta.quote.m4'
-        'begin': '(\\[)'
-        'beginCaptures':
-            '1':
-                'name': 'punctuation.definition.string.begin.bold.m4'
-        'end': '(\\])'
-        'endCaptures':
-            '1':
-                'name': 'punctuation.definition.string.end.bold.m4'
-        'patterns': [
-            {
-                'include': '$self'
-            }
-        ]
-    }
+'repository':
 
-    {
-        'name': 'meta.list.m4'
-        'begin': '(\\()'
-        'beginCaptures':
-            '1':
-                'name': 'punctuation.definition.begin.bold.m4'
-        'end': '(\\))'
-        'endCaptures':
-            '1':
-                'name': 'punctuation.definition.end.bold.m4'
-        'patterns': [
-            {
-                'include': '$self'
-            }
-        ]
-    }
+    'clear_comment':
+        'name':     'comment.line.m4'
+        'match':    '(?:\\b(?:m4_)?dnl(?:$|\\b)|\\#)\\s*$'
 
-    {
-        'name':     'support.constant.meta-argument.m4'
-        'match':    '\\$[\\#\\*\\@]'
-    }
+    'comment':
+        'name':     'comment.line.m4'
+        'match':    '(?:\\b(?:m4_)?dnl(?:$|\\b)|\\#).*$'
 
-    {
-        'name':     'support.constant.argument.m4'
-        'match':    '\\$[0-9]'
-    }
-
-    {
+    'define_macro':
         # This pattern attempts to match common macros that themselves operate
         # on macros so that we can highlight the names of the macros they
         # operate on.
@@ -83,13 +63,16 @@
             '1':
                 'name': 'punctuation.definition.parameters.begin.m4'
         'patterns': [
-            {
-                'include': '$self'
-            }
+            {'include': '#comment'}
+            {'include': '#define_macro'}
+            {'include': '#invoke_macro'}
+            {'include': '#quoted_input'}
+            {'include': '#no_arg_macros'}
+            {'include': '#paren_list'}
+            {'include': '#argument_tokens'}
         ]
-    }
 
-    {
+    'invoke_macro':
         # This pattern matches macros invoked with arguments. It highlights
         # macros with set prefixes as "keywords" and tje rest as "variables"
 
@@ -107,114 +90,72 @@
             '1':
                 'name': 'punctuation.definition.parameters.begin.m4'
         'patterns': [
-            {
-                'include': '$self'
-            }
+            {'include': '#comment'}
+            {'include': '#define_macro'}
+            {'include': '#invoke_macro'}
+            {'include': '#quoted_input'}
+            {'include': '#no_arg_macros'}
+            {'include': '#paren_list'}
+            {'include': '#argument_tokens'}
         ]
-    }
 
-    {
-        # Mark text discarded by dnl as a comment.
-        'name':     'comment.dnl.m4'
-        'match':    '\\b(?:m4_)?dnl\\b.*$'
-    }
-
-    {
-        # This pattern highlights macros that start and end with at least two
-        # underscores, optionally with m4_ prefixed.
-
-        'name':     'support.function.builtin.special.macro.m4'
-        'match':    '\\b(?:m4_)?[_]{2,}[a-zA-Z0-9_]*[_]{2,}\\b'
-    }
-
-    {
         # This pattern catches the builtins that are used without arguments.
         #
         # We don't highlight non-built in non-argument macros because they are
         # indistinguishable from plaintext.
 
+    'no_arg_macros':
         'name': 'support.function.builtin.m4'
-        'match': '\\b(?:[A-Z]+_INIT|[A-Z]+_PROG_[A-Z]+|(?:[_]*(?:m4|e4|AC|AM))[a-zA-Z0-9_]*)\\b'
-    }
-
-    #
-    {
-        'name':     'comment.javadoc.docucomment.line.m4'
-
-        'begin':    """(?x)
-            ^(\\#)(?:\\s([a-zA-Z0-9_]+\\((.*)\\)))$
-        |   ^\\#\\s([^\\s]+)\\s*$
-        """
-        'beginCaptures':
-            '2':
-                'name': 'title.markdown.markup.text.comment'
-            '3':
-                'name': 'heading.markdown.markup.text.comment'
-            '4':
-                'name': 'heading.markdown.markup.text.comment'
-        'end':      '^(?!\\#)|^\\s*\\#\\s*[\\-]+\\s*$'
-        'patterns': [
-
-            {
-                'name': 'comment.documentation.javadoc.docucomment.autodoc'
-                'match': """(?x)
-                    ^(\\#)(?:\\s([a-zA-Z0-9_]+\\((.*)\\)))$
-                |   ^\\#\\s([^\\s]+)\\s*$
-                """
-                'captures':
-                    '2':
-                        'name': 'title.markdown.markup.text.comment'
-                    '3':
-                        'name': 'heading.markdown.markup.text.comment'
-                    '4':
-                        'name': 'heading.markdown.markup.text.comment'
-            }
-            {
-                'name': 'comment.documentation.javadoc.docucomment.autodoc'
-                'match': '^\\#(.*[^\\-\\s].*)$'
-            }
-        ]
-    }
-
-    # 'comment.documentation.javadoc.docucomment.autodoc'
-    {
-        'name':     'comment.line.m4'
-
-        'begin':    """
-            ^\\s*(?=\\#)
-        """
-        'beginCaptures':
-            '2':
-                'name': 'markdown.title'
-            '3':
-                'name': 'markdown.heading'
-        'end':      '^(?!\\#)'
-        'patterns': [
-            {
-                'name':     'comment.line.m4'
-                'match': '([\\#]+)([^#]+)(\\1)'
-                'captures':
-                    '2':
-                        'name': 'markdown.title'
-            }
-        ]
-    }
-
-    {
-        # Code folding support. I'll probably be the only one to ever use this,
-        # but its harmless!
-
-        'name':     'comment.region.foldable.folding.m4'
-        'contentName': 'none';
-        'begin':    '^\\s*\\#\\s*region(.*)$'
+        'match': '''(?x)
+            (?: \\b(?:[A-Z]+_INIT|[A-Z]+_PROG_[A-Z]+|(?:[_]*(?:m4|e4|AC|AM))[a-zA-Z0-9_]*)\\b
+            | \\b(?:m4_)?[_]{2,}[a-zA-Z0-9_]*[_]{2,}\\b
+            )
+        '''
+    'quoted_input':
+        'name': 'meta.quote.m4'
+        'begin': '(\\[)'
         'beginCaptures':
             '1':
-                'name': 'markup.bold.m4'
-        'end':      '^\\s*\\#\\s*endregion\\s*#'
+                'name': 'punctuation.definition.string.begin.bold.m4'
+        'end': '(\\])'
+        'endCaptures':
+            '1':
+                'name': 'punctuation.definition.string.end.bold.m4'
         'patterns': [
-            {
-                'include': '$self'
-            }
+            {'include': '#clear_comment'}
+            {'include': '#define_macro'}
+            {'include': '#invoke_macro'}
+            {'include': '#quoted_input'}
+            {'include': '#no_arg_macros'}
+            {'include': '#paren_list'}
+            {'include': '#argument_tokens'}
         ]
-    }
-]
+
+    'paren_list':
+        'name': 'meta.list.m4'
+        'begin': '(\\()'
+        'beginCaptures':
+            '1':
+                'name': 'punctuation.definition.begin.bold.m4'
+        'end': '(\\))'
+        'endCaptures':
+            '1':
+                'name': 'punctuation.definition.end.bold.m4'
+        'patterns': [
+            {'include': '#comment'}
+            {'include': '#define_macro'}
+            {'include': '#invoke_macro'}
+            {'include': '#quoted_input'}
+            {'include': '#no_arg_macros'}
+            {'include': '#paren_list'}
+            {'include': '#argument_tokens'}
+        ]
+
+    'argument_tokens':
+        'name':     'support.constant'
+        'match':    '\\$(?:([\\#\\*\\@])|([0-9]))'
+        'captures':
+            '1':
+                'name': 'support.constant.meta-argument.m4'
+            '2':
+                'name': 'support.constant.argument.m4'

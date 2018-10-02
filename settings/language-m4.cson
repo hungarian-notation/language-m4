@@ -4,3 +4,4 @@
 '.source.m4':
   'editor':
     'commentStart': '@@ '
+    'softWrap': false
