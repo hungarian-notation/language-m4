@@ -1,6 +1,6 @@
 {
   "name": "language-m4",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "This package highlights autom4te-flavored m4, meaning square-bracket quote characters and a mix of redefined builtins, while still being somewhat compatible with stock m4.",
   "keywords": [
     "M4",
