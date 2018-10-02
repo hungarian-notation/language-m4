@@ -107,7 +107,7 @@
     'no_arg_macros':
         'name': 'support.function.builtin.m4'
         'match': '''(?x)
-            (?: \\b(?:[A-Z]+_INIT|[A-Z]+_PROG_[A-Z]+|(?:[_]*(?:m4|e4|AC|AM))[a-zA-Z0-9_]*)\\b
+            (?: \\b(?:[A-Z]+_INIT|[A-Z]+_PROG_[A-Z]+|(?:[_]*(?:m4|e4|AC|AM))[a-zA-Z0-9_]+)\\b
             | \\b(?:m4_)?[_]{2,}[a-zA-Z0-9_]*[_]{2,}\\b
             )
         '''
