@@ -1,6 +1,6 @@
 {
   "name": "language-m4",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "This package highlights \"common mode\" m4, meaning square-bracket quote characters and \"m4_\" prefixed builtins.",
   "keywords": [
     "language",
