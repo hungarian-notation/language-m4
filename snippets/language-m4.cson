@@ -5,9 +5,24 @@
   'm4 define':
     'prefix': 'm4_define'
     'body': 'm4_define([${1:name}], [${2:definition}])${3}'
-  'm4 ifelse':
-    'prefix': 'm4_ifelse'
-    'body': 'm4_ifelse([${1:value}], [${2:test}], [${3:equal}], [${4:not-equal}])${5}'
-  'm4sugar if':
+  'm4 include':
+    'prefix': 'm4_include'
+    'body': 'm4_include([${1:file}])${2}'
+  'M4sugar if':
     'prefix': 'm4_if'
     'body': 'm4_if([${1:value}], [${2:test}], [${3:equal}], [${4:not-equal}])${5}'
+  'ddd -> DNL':
+    'prefix': 'ddd'
+    'body': 'dnl ${1}'
+  'docnl -> DNL DOC':
+    'prefix': 'docnl'
+    'body': '''dnl ${1:name}(${2:args})
+    dnl ------------------------------
+    dnl ${3:comments}'''
+  'docdef -> DNL DOC and DEF':
+    'prefix': 'docdef'
+    'body': '''dnl ${1:name}(${2:args})
+    dnl ------------------------------
+    dnl ${3:comments}
+    m4_define([${1}],
+    [${4:body}])${5}'''
