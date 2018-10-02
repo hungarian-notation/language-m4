@@ -31,7 +31,12 @@
 
     'clear_comment':
         'name':     'comment.line.m4'
-        'match':    '(?:\\b(?:m4_)?dnl(?:$|\\b)|\\#)\\s*$'
+        'match':    '''(?x)
+            (?: \\b(?:m4_)?dnl(?:$|\\b)|\\#
+            |   ^\\s*\\#.*
+            |   ^\\s*(?:m4_)?dnl.*
+            )\\s*$
+        '''
 
     'comment':
         'name':     'comment.line.m4'
