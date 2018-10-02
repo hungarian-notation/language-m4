@@ -1,0 +1,19 @@
+{
+  "name": "language-m4",
+  "version": "0.0.1",
+  "description": "This package highlights \"common mode\" m4, meaning square-bracket quote characters and \"m4_\" prefixed builtins.",
+  "keywords": [
+    "language",
+    "grammar",
+    "M4",
+    "M4sugar",
+    "autom4te",
+    "automake",
+    "autoconf"
+  ],
+  "repository": "https://github.com/hungarian-notation/language-m4",
+  "license": "GPL v3+",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  }
+}
