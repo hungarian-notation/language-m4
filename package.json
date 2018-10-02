@@ -1,7 +1,7 @@
 {
   "name": "language-m4",
   "version": "0.6.1",
-  "description": "This package highlights \"common mode\" m4, meaning square-bracket quote characters and \"m4_\" prefixed builtins.",
+  "description": "This package highlights autom4te-flavored m4, meaning square-bracket quote characters and a mix of redefined builtins, while still being somewhat compatible with stock m4.",
   "keywords": [
     "M4",
     "M4sugar",
