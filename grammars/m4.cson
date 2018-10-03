@@ -107,7 +107,7 @@
                 # match DNL tokens that do not occur at the
                 # beginning of the line.
 
-                ^ [\\s]+ \\b dnl \\b
+                (?<=[^\\s]) \\s* \\b dnl \\b
             )
 
             ( \\s* [\\-]+ \\s* $ )?
